@@ -1,25 +1,27 @@
-// Settings for the Web scraper:
-// The function accepts a single argument: the "context" object.
+// Settings for the Cheerio scraper:
 
 async function pageFunction(context) {
-    // jQuery is handy for finding DOM elements and extracting data from them.
-    // To use it, make sure to enable the "Inject jQuery" option.
-    const $ = context.jQuery;
-    const pageTitle = $('h1.headline').first().text();
-    const pageAuthor = $('div.b-article__refs-author').text();
-    const pageOpener = $('div.b-article__lead').text();
-    const pageText = $('div.b-article__text');
-    const pageDate = $('time.b-article__refs-date').text();
-      
+    const { $, request, log } = context;
+
+    // The "$" property contains the Cheerio object which is useful
+    // for querying DOM elements and extracting data from them.
+    const pageTitle = $('title').first().text().trim();
+    const pageText = $('div.b-article__text p').text().trim();
+    const pageDate = $('time.b-article__refs-date').text().trim();
+    const pageOpener = $('div.b-article__lead p').text().trim();
+    const pageAuthor = $('div.b-article__refs-author a').text().trim();
+    const pageSection = $('a.b-article__refs-rubric').text().trim();
+
+
     // Return an object with the data extracted from the page.
     // It will be stored to the resulting dataset.
-     return {
-        url: context.request.url,
-        pageTitle,
-        pageAuthor,
-        pageOpener,
+    return {
+        pageSection,
         pageText,
-        pageDate
-        
+        pageOpener,
+        pageDate,
+        pageAuthor,
+        pageTitle,
+        url: context.request.url
     };
 }
