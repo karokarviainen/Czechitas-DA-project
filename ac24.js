@@ -1,4 +1,4 @@
-// Settins for Cheerio scraper:
+// Settings for Cheerio scraper:
 
 async function pageFunction(context) {
     const { $, request, log } = context;
@@ -26,3 +26,14 @@ async function pageFunction(context) {
         //pageSection
     };
 }
+
+// AC24_problemy
+// Nejde mi dostat do dat autora a rubriku.
+// Autor by asi nebyl tak velký problém, protože stejně všude mají "Redakce AC24".
+// Rubrika je trochu průšvih, protože ji nemají uvedenou v URL.
+
+
+// Zkoušela jsem různé tagy. Třeba tyhle. Ale nic nešlo.
+
+//     const pageAuthor = $('div.ac24-portlet-badge').text().trim();
+//     const pageSection = $('div.ac24-portlet-badge').text().trim();
