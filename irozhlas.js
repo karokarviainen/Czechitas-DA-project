@@ -27,3 +27,16 @@ async function pageFunction(context) {
         
     };
 }
+
+// Problemy:
+
+// - PageSection: 
+// const pageSection = $('#breadcrumb').text();
+// Tahle bere jen "Kde se nacházíte"
+// Ale neřešila bych to a vzala pak z URL.
+
+// - PageText:
+// const pageText = $('p').text().trim();
+// Asi to docela funguje, text tam je. Ale nevím, ten tag je nějak moc malej :-).
+// A taky teda to bere text včetně perexu.
+// Takže perex je pak ve sloupci PageOpener a ještě jednou v textu.
