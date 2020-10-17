@@ -1,8 +1,9 @@
+// Aeronet was the only website we scraped only using Apify's Web scraper (other websites were scraped with Cheerio scraper)
+
 // Settings for Web Scraper - Aeronet:
 
 // The function accepts a single argument: the "context" object.
-// For a complete list of its properties and functions,
-// see https://apify.com/apify/web-scraper#page-function 
+
 async function pageFunction(context) {
     // jQuery is handy for finding DOM elements and extracting data from them.
     // To use it, make sure to enable the "Inject jQuery" option.
