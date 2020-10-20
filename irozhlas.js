@@ -1,4 +1,4 @@
-// Settings for Cheerio scraper:
+// Settings for Cheerio scraper - iRozhlas:
 
 async function pageFunction(context) {
     const { $, request, log } = context;
@@ -12,12 +12,16 @@ async function pageFunction(context) {
     const pageDate = $('time').text().trim();
     const pageSection = $('div.row.row--article.hide--m').text().trim(); 
 
+    // The "request" property contains various information about the web page loaded. 
+    const url = request.url;
 
+    // Use "log" object to print information to actor log.
+    log.info('iRozhlas', { url, pageTitle });
 
     // Return an object with the data extracted from the page.
     // It will be stored to the resulting dataset.
     return {
-        url: context.request.url,
+        url,
         pageTitle,
         pageAuthor,
         pageOpener,
