@@ -1,0 +1,60 @@
+--- Create copy of table
+
+CREATE OR REPLACE TABLE irozhlas_copy AS
+SELECT * FROM irozhlas_unclean;
+
+--- Change date format
+
+CREATE OR REPLACE TABLE irozhlas_copy AS
+SELECT SPLIT("pageDate", ' ') AS pagedate_split
+       , LEFT(SPLIT("pageDate", ' ')[3], 4) AS rok
+       , SPLIT("pageDate", ' ')[2] AS mesic_txt
+       , CASE WHEN mesic_txt = 'ledna' OR mesic_txt = '1.' THEN '01'
+              WHEN mesic_txt = 'února' OR mesic_txt = '2.' THEN '02'
+              WHEN mesic_txt = 'března' OR mesic_txt = '3.' THEN '03'
+              WHEN mesic_txt = 'dubna' OR mesic_txt = '4.' THEN '04'
+              WHEN mesic_txt = 'května' OR mesic_txt = '5.' THEN '05'
+              WHEN mesic_txt = 'června' OR mesic_txt = '6.' THEN '06'
+              WHEN mesic_txt = 'července' OR mesic_txt = '7.' THEN '07'
+              WHEN mesic_txt = 'srpna' OR mesic_txt = '8.' THEN '08'
+              WHEN mesic_txt = 'září' OR mesic_txt = '9.' THEN '09'
+              WHEN mesic_txt = 'října' OR mesic_txt = '10.' THEN '10'
+              WHEN mesic_txt = 'listopadu' OR mesic_txt = '11.' THEN '11'
+              WHEN mesic_txt = 'prosince' OR mesic_txt = '12.' THEN '12'
+          END AS mesic
+          , RTRIM(SPLIT("pageDate", ' ')[1],'.') AS den
+          , DATE_FROM_PARTS(rok, mesic, den) AS date
+          , *
+FROM irozhlas_unclean
+WHERE "pageText" <> '';
+
+--- Remove auxiliary columns
+
+ALTER TABLE irozhlas_copy DROP COLUMN rok;
+ALTER TABLE irozhlas_copy DROP COLUMN mesic_txt;
+ALTER TABLE irozhlas_copy DROP COLUMN den;
+ALTER TABLE irozhlas_copy DROP COLUMN mesic;
+ALTER TABLE irozhlas_copy DROP COLUMN pagedate_split;
+
+--- Column "source"
+
+ALTER TABLE irozhlas_copy ADD COLUMN "source" varchar(255);
+UPDATE irozhlas_copy SET "source" = 'iRozhlas';
+
+--- Create "kinda clean" table
+
+CREATE OR REPLACE TABLE irozhlas_kinda_clean AS
+SELECT DISTINCT("source" || date || "pageTitle" || "pageText") AS id
+       , "pageAuthor"
+       , date as "pageDate"
+       , "pageOpener"
+       , "pageSection"
+       , "pageText"
+       , "pageTitle"
+       , "url"
+       , "source"
+FROM irozhlas_copy 
+WHERE CONCAT("pageText","pageTitle","pageOpener") ILIKE '%rusk%'
+OR CONCAT("pageText","pageTitle","pageOpener") ILIKE '%putin%'
+OR CONCAT("pageText","pageTitle","pageOpener") ILIKE '%moskv%'
+OR CONCAT("pageText","pageTitle","pageOpener") ILIKE '%moskev%';

@@ -1,0 +1,48 @@
+--- Create copy of table
+
+CREATE OR REPLACE TABLE novinky_copy AS
+SELECT * FROM novinky_unclean;
+
+--- Change date format
+
+CREATE OR REPLACE TABLE novinky_copy AS
+SELECT SPLIT(LEFT("pageDate", 12), '.') AS pagedate_split  
+       , LEFT(SPLIT(LEFT("pageDate", 12), '.')[2], 5) AS rok
+       , SPLIT(LEFT("pageDate", 12), '.')[1] AS mesic
+       , SPLIT(LEFT("pageDate", 12), '.')[0] AS den
+       , DATE_FROM_PARTS(rok, mesic, den) AS date
+       , *        
+FROM novinky_unclean
+WHERE rok IS NOT NULL
+      AND mesic IS NOT NULL
+      AND den IS NOT NULL;
+
+--- Remove auxiliary columns
+
+ALTER TABLE novinky_copy DROP COLUMN rok;
+ALTER TABLE novinky_copy DROP COLUMN den;
+ALTER TABLE novinky_copy DROP COLUMN mesic;
+ALTER TABLE novinky_copy DROP COLUMN pagedate_split;
+
+--- Column "source"
+
+ALTER TABLE novinky_copy ADD COLUMN "source" varchar(255);
+UPDATE novinky_copy SET "source" = 'Novinky';
+
+--- Create "kinda clean" table
+
+CREATE OR REPLACE TABLE novinky_kinda_clean AS
+SELECT DISTINCT("source" || date || "pageTitle") AS id
+       , "pageAuthor"
+       , date AS "pageDate"
+       , "pageOpener"
+       , "pageSection"
+       , "pageText"
+       , "pageTitle"
+       , "url"
+       , "source"
+FROM novinky_copy
+WHERE CONCAT("pageText","pageTitle","pageOpener") ILIKE '%rusk%'
+OR CONCAT("pageText","pageTitle","pageOpener") ILIKE '%putin%'
+OR CONCAT("pageText","pageTitle","pageOpener") ILIKE '%moskv%'
+OR CONCAT("pageText","pageTitle","pageOpener") ILIKE '%moskev%';

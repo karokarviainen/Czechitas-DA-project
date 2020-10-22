@@ -1,0 +1,57 @@
+--- Create copy of table
+
+CREATE OR REPLACE TABLE aeronet_copy AS
+SELECT * FROM aeronet_unclean;
+
+--- Change date format
+
+CREATE OR REPLACE TABLE aeronet_copy AS
+SELECT SPLIT("pageDate", ', ')[1] as rok
+       , SPLIT(SPLIT("pageDate", ', ')[0], ' ')[0] AS mesic_txt
+       , SPLIT(SPLIT("pageDate", ', ')[0], ' ')[1] AS den
+       , CASE WHEN mesic_txt = 'Led' THEN '01'
+              WHEN mesic_txt = 'Úno' THEN '02'
+              WHEN mesic_txt = 'Bře' THEN '03'
+              WHEN mesic_txt = 'Dub' THEN '04'
+              WHEN mesic_txt = 'Kvě' THEN '05'
+              WHEN mesic_txt = 'Čvn' THEN '06'
+              WHEN mesic_txt = 'Čvc' THEN '07'
+              WHEN mesic_txt = 'Srp' THEN '08'
+              WHEN mesic_txt = 'Zář' THEN '09'
+              WHEN mesic_txt = 'Říj' THEN '10'
+              WHEN mesic_txt = 'Lid' THEN '11'
+              WHEN mesic_txt = 'Pro' THEN '12'
+          END AS mesic
+          , DATE_FROM_PARTS(rok, mesic, den) AS date
+          , *
+FROM aeronet_unclean;
+
+--- Remove excess columns
+
+ALTER TABLE aeronet_copy DROP COLUMN rok;
+ALTER TABLE aeronet_copy DROP COLUMN mesic_txt;
+ALTER TABLE aeronet_copy DROP COLUMN den;
+ALTER TABLE aeronet_copy DROP COLUMN mesic;
+
+--- Column "source"
+
+ALTER TABLE aeronet_copy ADD COLUMN "source" varchar(255);
+UPDATE aeronet_copy SET "source" = 'Aeronet';
+
+--- Create "kinda clean" table
+
+CREATE OR REPLACE TABLE aeronet_kinda_clean AS
+SELECT DISTINCT("source" || date || "pageTitle") AS id
+       , "pageAuthor"
+       , date as "pageDate"
+       , "pageOpener"
+       , "pageSection"
+       , "pageTitle"
+       , "pageText"
+       , "url"
+       , "source"
+FROM aeronet_copy 
+WHERE CONCAT("pageText","pageTitle","pageOpener") ILIKE '%rusk%'
+OR CONCAT("pageText","pageTitle","pageOpener") ILIKE '%putin%'
+OR CONCAT("pageText","pageTitle","pageOpener") ILIKE '%moskv%'
+OR CONCAT("pageText","pageTitle","pageOpener") ILIKE '%moskev%';
